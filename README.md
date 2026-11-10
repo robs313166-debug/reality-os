@@ -6,11 +6,11 @@ Experimental OS for personal reality: consciousness tools, goal management, and 
 
 Open `index.html` in a browser (no server required). All data is stored in localStorage.
 
-## Features (v0.2)
+## Features (v0.3)
 
-- Dashboard with status cards and recent activity
+- Dashboard with status cards, recent activity, and simple system visualization
 - Goals with completion tracking
-- Protocols (reusable if-then procedures)
+- Protocols (reusable if-then procedures) with one-click templates
 - System notes / refactoring log
 - Progress history
 - JSON import / export

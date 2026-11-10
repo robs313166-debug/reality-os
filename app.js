@@ -11,6 +11,7 @@ const historyList = document.getElementById('history-list');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importFile = document.getElementById('import-file');
+const vizEl = document.getElementById('viz');
 
 const KEYS = {
   goals: 'realityos-goals',
@@ -70,7 +71,6 @@ function loadHistory() {
     li.innerHTML = `<span class="hint">${new Date(h.time).toLocaleString()}</span> — ${escapeHtml(h.event)} ${h.detail ? `<em>${escapeHtml(h.detail)}</em>` : ''}`;
     historyList.append(li);
   });
-  // dashboard recent
   const recent = document.getElementById('dash-recent');
   recent.innerHTML = '';
   history.slice(0, 5).forEach(h => {
@@ -86,6 +86,7 @@ function updateStatus() {
   const active = goals.filter(g => !g.done).length;
   const done = goals.filter(g => g.done).length;
   document.getElementById('goal-count').textContent = `Goals: ${goals.length}`;
+  document.getElementById('protocol-count').textContent = `Protocols: ${protocols.length}`;
   document.getElementById('dash-active').textContent = active;
   document.getElementById('dash-done').textContent = done;
   document.getElementById('dash-protocols').textContent = protocols.length;
@@ -96,10 +97,39 @@ function updateStatus() {
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
   document.getElementById('uptime').textContent = `Uptime: ${days}d ${hours}h`;
+  document.getElementById('dash-uptime').textContent = `${days}d`;
+
+  renderViz(goals, protocols);
+}
+
+function renderViz(goals, protocols) {
+  vizEl.innerHTML = '';
+  const total = goals.length + protocols.length;
+  if (total === 0) {
+    vizEl.textContent = 'Add goals or protocols to see system state.';
+    return;
+  }
+  const activeGoals = goals.filter(g => !g.done).length;
+  const bar = document.createElement('div');
+  bar.className = 'viz-bar';
+  const goalSeg = document.createElement('div');
+  goalSeg.className = 'seg goals';
+  goalSeg.style.flex = goals.length || 0.1;
+  goalSeg.title = `${goals.length} goals`;
+  const protoSeg = document.createElement('div');
+  protoSeg.className = 'seg protocols';
+  protoSeg.style.flex = protocols.length || 0.1;
+  protoSeg.title = `${protocols.length} protocols`;
+  bar.append(goalSeg, protoSeg);
+  vizEl.append(bar);
+  const label = document.createElement('p');
+  label.className = 'hint';
+  label.textContent = `Goals (${activeGoals} active) · Protocols · Click items to manage`;
+  vizEl.append(label);
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
 }
 
 function loadAll() {
@@ -162,6 +192,14 @@ function removeProtocol(i) {
   loadAll();
 }
 
+document.querySelectorAll('.template').forEach(btn => {
+  btn.onclick = () => {
+    protocolTitle.value = btn.dataset.title;
+    protocolBody.value = btn.dataset.body;
+    protocolTitle.focus();
+  };
+});
+
 saveNotesBtn.onclick = () => {
   localStorage.setItem(KEYS.notes, notesEl.value);
   log('Notes saved');
@@ -208,7 +246,6 @@ importFile.onchange = () => {
   importFile.value = '';
 };
 
-// Tabs
 document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

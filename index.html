@@ -10,12 +10,13 @@
   <header>
     <div class="brand">
       <h1>realityOS</h1>
-      <span class="version">v0.2</span>
+      <span class="version">v0.3</span>
     </div>
     <p>Personal operating system for consciousness, goals, and system refactoring.</p>
     <div class="status">
       <span id="uptime">Uptime: —</span>
       <span id="goal-count">Goals: 0</span>
+      <span id="protocol-count">Protocols: 0</span>
     </div>
   </header>
   <nav>
@@ -41,7 +42,13 @@
           <h3>Protocols</h3>
           <p id="dash-protocols">0</p>
         </div>
+        <div class="card">
+          <h3>Uptime</h3>
+          <p id="dash-uptime">0d</p>
+        </div>
       </div>
+      <h3>System Visualization</h3>
+      <div id="viz" class="viz"></div>
       <h3>Recent Activity</h3>
       <ul id="dash-recent"></ul>
     </section>
@@ -58,6 +65,12 @@
     <section id="protocols" class="panel">
       <h2>Protocols</h2>
       <p class="hint">Reusable if-then procedures for debugging perception and behavior.</p>
+      <div class="templates">
+        <p class="hint">Templates:</p>
+        <button type="button" class="template" data-title="Root Cause Pause" data-body="If I notice automatic reaction → then pause, name the program, ask 'what is the root cause?'">Root Cause</button>
+        <button type="button" class="template" data-title="Uptime Check" data-body="If energy low or distraction high → then check sleep/food/movement, then one focused action">Uptime Check</button>
+        <button type="button" class="template" data-title="Belief Debug" data-body="If strong judgment or emotion → then write the assumption, test it against evidence, update map">Belief Debug</button>
+      </div>
       <form id="protocol-form">
         <input type="text" id="protocol-title" placeholder="Protocol name" required>
         <textarea id="protocol-body" placeholder="If [condition] → then [action]" required></textarea>
