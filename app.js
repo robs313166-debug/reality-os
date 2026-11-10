@@ -18,7 +18,8 @@ const KEYS = {
   notes: 'realityos-notes',
   protocols: 'realityos-protocols',
   history: 'realityos-history',
-  start: 'realityos-start'
+  start: 'realityos-start',
+  executions: 'realityos-executions'
 };
 
 function now() { return new Date().toISOString(); }
@@ -54,13 +55,30 @@ function loadProtocols() {
     const li = document.createElement('li');
     const div = document.createElement('div');
     div.innerHTML = `<strong>${escapeHtml(p.title)}</strong><br><span class="hint">${escapeHtml(p.body)}</span>`;
-    const btn = document.createElement('button');
-    btn.textContent = '×';
-    btn.onclick = () => removeProtocol(i);
-    li.append(div, btn);
+    const actions = document.createElement('div');
+    const execBtn = document.createElement('button');
+    execBtn.textContent = 'Execute';
+    execBtn.style.marginRight = '0.5rem';
+    execBtn.onclick = () => executeProtocol(i);
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '×';
+    delBtn.onclick = () => removeProtocol(i);
+    actions.append(execBtn, delBtn);
+    li.append(div, actions);
     protocolList.append(li);
   });
   updateStatus();
+}
+
+function executeProtocol(i) {
+  const protocols = JSON.parse(localStorage.getItem(KEYS.protocols) || '[]');
+  const p = protocols[i];
+  const executions = JSON.parse(localStorage.getItem(KEYS.executions) || '[]');
+  executions.unshift({ title: p.title, time: now() });
+  if (executions.length > 100) executions.length = 100;
+  localStorage.setItem(KEYS.executions, JSON.stringify(executions));
+  log('Protocol executed', p.title);
+  loadAll();
 }
 
 function loadHistory() {
@@ -83,6 +101,7 @@ function loadHistory() {
 function updateStatus() {
   const goals = JSON.parse(localStorage.getItem(KEYS.goals) || '[]');
   const protocols = JSON.parse(localStorage.getItem(KEYS.protocols) || '[]');
+  const executions = JSON.parse(localStorage.getItem(KEYS.executions) || '[]');
   const active = goals.filter(g => !g.done).length;
   const done = goals.filter(g => g.done).length;
   document.getElementById('goal-count').textContent = `Goals: ${goals.length}`;
@@ -90,6 +109,7 @@ function updateStatus() {
   document.getElementById('dash-active').textContent = active;
   document.getElementById('dash-done').textContent = done;
   document.getElementById('dash-protocols').textContent = protocols.length;
+  document.getElementById('dash-executions').textContent = executions.length;
 
   const start = localStorage.getItem(KEYS.start) || now();
   if (!localStorage.getItem(KEYS.start)) localStorage.setItem(KEYS.start, start);
@@ -97,14 +117,13 @@ function updateStatus() {
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
   document.getElementById('uptime').textContent = `Uptime: ${days}d ${hours}h`;
-  document.getElementById('dash-uptime').textContent = `${days}d`;
 
-  renderViz(goals, protocols);
+  renderViz(goals, protocols, executions);
 }
 
-function renderViz(goals, protocols) {
+function renderViz(goals, protocols, executions) {
   vizEl.innerHTML = '';
-  const total = goals.length + protocols.length;
+  const total = goals.length + protocols.length + Math.min(executions.length, 20);
   if (total === 0) {
     vizEl.textContent = 'Add goals or protocols to see system state.';
     return;
@@ -120,11 +139,15 @@ function renderViz(goals, protocols) {
   protoSeg.className = 'seg protocols';
   protoSeg.style.flex = protocols.length || 0.1;
   protoSeg.title = `${protocols.length} protocols`;
-  bar.append(goalSeg, protoSeg);
+  const execSeg = document.createElement('div');
+  execSeg.className = 'seg executions';
+  execSeg.style.flex = Math.min(executions.length, 10) || 0.1;
+  execSeg.title = `${executions.length} executions`;
+  bar.append(goalSeg, protoSeg, execSeg);
   vizEl.append(bar);
   const label = document.createElement('p');
   label.className = 'hint';
-  label.textContent = `Goals (${activeGoals} active) · Protocols · Click items to manage`;
+  label.textContent = `Goals (${activeGoals} active) · Protocols · Executions · Click to manage`;
   vizEl.append(label);
 }
 
@@ -213,6 +236,7 @@ exportBtn.onclick = () => {
     notes: localStorage.getItem(KEYS.notes) || '',
     protocols: JSON.parse(localStorage.getItem(KEYS.protocols) || '[]'),
     history: JSON.parse(localStorage.getItem(KEYS.history) || '[]'),
+    executions: JSON.parse(localStorage.getItem(KEYS.executions) || '[]'),
     exported: now()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -235,6 +259,7 @@ importFile.onchange = () => {
       if (data.notes !== undefined) localStorage.setItem(KEYS.notes, data.notes);
       if (data.protocols) localStorage.setItem(KEYS.protocols, JSON.stringify(data.protocols));
       if (data.history) localStorage.setItem(KEYS.history, JSON.stringify(data.history));
+      if (data.executions) localStorage.setItem(KEYS.executions, JSON.stringify(data.executions));
       log('Data imported');
       loadAll();
       alert('Import successful');
