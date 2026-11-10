@@ -8,22 +8,78 @@
 </head>
 <body>
   <header>
-    <h1>realityOS</h1>
+    <div class="brand">
+      <h1>realityOS</h1>
+      <span class="version">v0.2</span>
+    </div>
     <p>Personal operating system for consciousness, goals, and system refactoring.</p>
+    <div class="status">
+      <span id="uptime">Uptime: —</span>
+      <span id="goal-count">Goals: 0</span>
+    </div>
   </header>
+  <nav>
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="goals">Goals</button>
+    <button class="tab" data-tab="protocols">Protocols</button>
+    <button class="tab" data-tab="notes">Notes</button>
+    <button class="tab" data-tab="history">History</button>
+  </nav>
   <main>
-    <section id="goals">
+    <section id="dashboard" class="panel active">
+      <h2>System Status</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Active Goals</h3>
+          <p id="dash-active">0</p>
+        </div>
+        <div class="card">
+          <h3>Completed</h3>
+          <p id="dash-done">0</p>
+        </div>
+        <div class="card">
+          <h3>Protocols</h3>
+          <p id="dash-protocols">0</p>
+        </div>
+      </div>
+      <h3>Recent Activity</h3>
+      <ul id="dash-recent"></ul>
+    </section>
+
+    <section id="goals" class="panel">
       <h2>Goals</h2>
       <form id="goal-form">
-        <input type="text" id="goal-input" placeholder="New goal or protocol" required>
+        <input type="text" id="goal-input" placeholder="New goal or intention" required>
         <button type="submit">Add</button>
       </form>
       <ul id="goal-list"></ul>
     </section>
-    <section id="notes">
+
+    <section id="protocols" class="panel">
+      <h2>Protocols</h2>
+      <p class="hint">Reusable if-then procedures for debugging perception and behavior.</p>
+      <form id="protocol-form">
+        <input type="text" id="protocol-title" placeholder="Protocol name" required>
+        <textarea id="protocol-body" placeholder="If [condition] → then [action]" required></textarea>
+        <button type="submit">Save protocol</button>
+      </form>
+      <ul id="protocol-list"></ul>
+    </section>
+
+    <section id="notes" class="panel">
       <h2>System Notes / Refactoring</h2>
-      <textarea id="notes" placeholder="Internal programs, automatic reactions, diagnostics..."></textarea>
+      <textarea id="notes" placeholder="Internal programs, automatic reactions, diagnostics, root-cause analysis..."></textarea>
       <button id="save-notes">Save notes</button>
+    </section>
+
+    <section id="history" class="panel">
+      <h2>Progress History</h2>
+      <div class="actions">
+        <button id="export-btn">Export data</button>
+        <button id="import-btn">Import data</button>
+        <input type="file" id="import-file" accept=".json" hidden>
+      </div>
+      <ul id="history-list"></ul>
     </section>
   </main>
   <footer>
