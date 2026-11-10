@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>realityOS — Personal Reality</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>realityOS</h1>
+    <p>Personal operating system for consciousness, goals, and system refactoring.</p>
+  </header>
+  <main>
+    <section id="goals">
+      <h2>Goals</h2>
+      <form id="goal-form">
+        <input type="text" id="goal-input" placeholder="New goal or protocol" required>
+        <button type="submit">Add</button>
+      </form>
+      <ul id="goal-list"></ul>
+    </section>
+    <section id="notes">
+      <h2>System Notes / Refactoring</h2>
+      <textarea id="notes" placeholder="Internal programs, automatic reactions, diagnostics..."></textarea>
+      <button id="save-notes">Save notes</button>
+    </section>
+  </main>
+  <footer>
+    <p>Local-only prototype. Data stays in your browser. <a href="https://github.com/robs313166-debug/reality-os">source</a></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
