@@ -10,7 +10,7 @@
   <header>
     <div class="brand">
       <h1>realityOS</h1>
-      <span class="version">v0.3</span>
+      <span class="version">v0.4</span>
     </div>
     <p>Personal operating system for consciousness, goals, and system refactoring.</p>
     <div class="status">
@@ -23,6 +23,7 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="protocols">Protocols</button>
+    <button class="tab" data-tab="knowledge">Knowledge</button>
     <button class="tab" data-tab="notes">Notes</button>
     <button class="tab" data-tab="history">History</button>
   </nav>
@@ -43,8 +44,8 @@
           <p id="dash-protocols">0</p>
         </div>
         <div class="card">
-          <h3>Uptime</h3>
-          <p id="dash-uptime">0d</p>
+          <h3>Executions</h3>
+          <p id="dash-executions">0</p>
         </div>
       </div>
       <h3>System Visualization</h3>
@@ -64,7 +65,7 @@
 
     <section id="protocols" class="panel">
       <h2>Protocols</h2>
-      <p class="hint">Reusable if-then procedures for debugging perception and behavior.</p>
+      <p class="hint">Reusable if-then procedures for debugging perception and behavior. Click Execute to log use.</p>
       <div class="templates">
         <p class="hint">Templates:</p>
         <button type="button" class="template" data-title="Root Cause Pause" data-body="If I notice automatic reaction → then pause, name the program, ask 'what is the root cause?'">Root Cause</button>
@@ -77,6 +78,27 @@
         <button type="submit">Save protocol</button>
       </form>
       <ul id="protocol-list"></ul>
+    </section>
+
+    <section id="knowledge" class="panel">
+      <h2>Knowledge Library</h2>
+      <p class="hint">Core principles and series for system installation. (Prototype content)</p>
+      <div class="knowledge-item">
+        <h3>S1. System Architecture</h3>
+        <p>Human existence is a system. Debug automatic reactions. Maximize uptime through protocols.</p>
+      </div>
+      <div class="knowledge-item">
+        <h3>S1.B1 Root Access</h3>
+        <p>You interact with maps, not reality. Question axioms. Delete legacy code.</p>
+      </div>
+      <div class="knowledge-item">
+        <h3>S1.B2 Protocols Over Advice</h3>
+        <p>Advice is useless. Use if-then protocols that change system state based on process physics.</p>
+      </div>
+      <div class="knowledge-item">
+        <h3>Validation</h3>
+        <p>Truth is reproducibility of results. If the protocol produces the predicted change, it is valid.</p>
+      </div>
     </section>
 
     <section id="notes" class="panel">
