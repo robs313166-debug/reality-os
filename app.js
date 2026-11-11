@@ -30,6 +30,15 @@ function log(event, detail = '') {
   localStorage.setItem(KEYS.history, JSON.stringify(history));
 }
 
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function loadGoals() {
   const goals = JSON.parse(localStorage.getItem(KEYS.goals) || '[]');
   goalList.innerHTML = '';
@@ -39,13 +48,29 @@ function loadGoals() {
     span.textContent = g.text;
     if (g.done) span.classList.add('done');
     span.onclick = () => toggleGoal(i);
+    const actions = document.createElement('div');
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.style.marginRight = '0.5rem';
+    editBtn.onclick = (e) => { e.stopPropagation(); editGoal(i); };
     const btn = document.createElement('button');
     btn.textContent = '×';
     btn.onclick = (e) => { e.stopPropagation(); removeGoal(i); };
-    li.append(span, btn);
+    actions.append(editBtn, btn);
+    li.append(span, actions);
     goalList.append(li);
   });
   updateStatus();
+}
+
+function editGoal(i) {
+  const goals = JSON.parse(localStorage.getItem(KEYS.goals) || '[]');
+  const newText = prompt('Edit goal:', goals[i].text);
+  if (newText === null || newText.trim() === '') return;
+  goals[i].text = newText.trim();
+  localStorage.setItem(KEYS.goals, JSON.stringify(goals));
+  log('Goal edited', goals[i].text);
+  loadAll();
 }
 
 function loadProtocols() {
@@ -60,14 +85,33 @@ function loadProtocols() {
     execBtn.textContent = 'Execute';
     execBtn.style.marginRight = '0.5rem';
     execBtn.onclick = () => executeProtocol(i);
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.style.marginRight = '0.5rem';
+    editBtn.onclick = () => editProtocol(i);
     const delBtn = document.createElement('button');
     delBtn.textContent = '×';
     delBtn.onclick = () => removeProtocol(i);
-    actions.append(execBtn, delBtn);
+    actions.append(execBtn, editBtn, delBtn);
     li.append(div, actions);
     protocolList.append(li);
   });
   updateStatus();
+}
+
+function editProtocol(i) {
+  const protocols = JSON.parse(localStorage.getItem(KEYS.protocols) || '[]');
+  const p = protocols[i];
+  const newTitle = prompt('Edit title:', p.title);
+  if (newTitle === null) return;
+  const newBody = prompt('Edit body:', p.body);
+  if (newBody === null) return;
+  if (!newTitle.trim() || !newBody.trim()) return;
+  p.title = newTitle.trim();
+  p.body = newBody.trim();
+  localStorage.setItem(KEYS.protocols, JSON.stringify(protocols));
+  log('Protocol edited', p.title);
+  loadAll();
 }
 
 function executeProtocol(i) {
@@ -133,26 +177,22 @@ function renderViz(goals, protocols, executions) {
   bar.className = 'viz-bar';
   const goalSeg = document.createElement('div');
   goalSeg.className = 'seg goals';
-  goalSeg.style.flex = goals.length || 0.1;
-  goalSeg.title = `${goals.length} goals`;
+  goalSeg.style.flex = Math.max(goals.length, 0.5);
+  goalSeg.title = `${goals.length} goals (${activeGoals} active)`;
   const protoSeg = document.createElement('div');
   protoSeg.className = 'seg protocols';
-  protoSeg.style.flex = protocols.length || 0.1;
+  protoSeg.style.flex = Math.max(protocols.length, 0.5);
   protoSeg.title = `${protocols.length} protocols`;
   const execSeg = document.createElement('div');
   execSeg.className = 'seg executions';
-  execSeg.style.flex = Math.min(executions.length, 10) || 0.1;
+  execSeg.style.flex = Math.max(Math.min(executions.length, 10), 0.5);
   execSeg.title = `${executions.length} executions`;
   bar.append(goalSeg, protoSeg, execSeg);
   vizEl.append(bar);
   const label = document.createElement('p');
   label.className = 'hint';
-  label.textContent = `Goals (${activeGoals} active) · Protocols · Executions · Click to manage`;
+  label.textContent = `Goals (${activeGoals} active) · Protocols · Executions · Click items to manage`;
   vizEl.append(label);
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
 }
 
 function loadAll() {

@@ -68,8 +68,8 @@ li {
 .card h3 { margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--muted); font-weight: 500; }
 .card p { margin: 0; font-size: 1.8rem; font-weight: 600; }
 .viz { margin: 1rem 0; }
-.viz-bar { display: flex; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-.seg { min-width: 4px; }
+.viz-bar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.seg { min-width: 8px; transition: flex 0.3s; }
 .seg.goals { background: var(--accent); }
 .seg.protocols { background: #6c5ce7; }
 .seg.executions { background: #00b894; }
