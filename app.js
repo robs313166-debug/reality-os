@@ -32,10 +32,10 @@ function log(event, detail = '') {
 
 function escapeHtml(s) {
   return String(s)
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
 
@@ -117,11 +117,12 @@ function editProtocol(i) {
 function executeProtocol(i) {
   const protocols = JSON.parse(localStorage.getItem(KEYS.protocols) || '[]');
   const p = protocols[i];
+  const outcome = prompt('Outcome / effectiveness note (optional):\n(e.g. "worked", "partial", "did nothing", or a short observation)', '') || '';
   const executions = JSON.parse(localStorage.getItem(KEYS.executions) || '[]');
-  executions.unshift({ title: p.title, time: now() });
+  executions.unshift({ title: p.title, time: now(), outcome: outcome.trim() });
   if (executions.length > 100) executions.length = 100;
   localStorage.setItem(KEYS.executions, JSON.stringify(executions));
-  log('Protocol executed', p.title);
+  log('Protocol executed', p.title + (outcome ? ' — ' + outcome : ''));
   loadAll();
 }
 
@@ -194,6 +195,41 @@ function renderViz(goals, protocols, executions) {
   label.className = 'hint';
   label.textContent = `Goals (${activeGoals} active · ${completion}% complete) · Protocols · Executions`;
   vizEl.append(label);
+
+  // Simple completion ring
+  const ringWrap = document.createElement('div');
+  ringWrap.style.marginTop = '1rem';
+  ringWrap.style.textAlign = 'center';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '80');
+  svg.setAttribute('height', '80');
+  svg.setAttribute('viewBox', '0 0 36 36');
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  bg.setAttribute('d', 'M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831');
+  bg.setAttribute('fill', 'none');
+  bg.setAttribute('stroke', '#333');
+  bg.setAttribute('stroke-width', '3');
+  const fg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  fg.setAttribute('d', 'M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831');
+  fg.setAttribute('fill', 'none');
+  fg.setAttribute('stroke', '#5b8cff');
+  fg.setAttribute('stroke-width', '3');
+  fg.setAttribute('stroke-dasharray', `${completion}, 100`);
+  fg.setAttribute('stroke-linecap', 'round');
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', '18');
+  text.setAttribute('y', '20.5');
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('fill', '#eee');
+  text.setAttribute('font-size', '8');
+  text.textContent = completion + '%';
+  svg.append(bg, fg, text);
+  ringWrap.append(svg);
+  const ringLabel = document.createElement('div');
+  ringLabel.className = 'hint';
+  ringLabel.textContent = 'Goal completion';
+  ringWrap.append(ringLabel);
+  vizEl.append(ringWrap);
 }
 
 function loadAll() {
@@ -319,6 +355,31 @@ document.querySelectorAll('.tab').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(btn.dataset.tab).classList.add('active');
   };
+});
+
+// Self-test helpers
+function runSelfTest() {
+  const questions = [
+    { q: 'What is a protocol in realityOS?', a: 'if-then' },
+    { q: 'Uptime means?', a: 'sustained effective action' },
+    { q: 'You interact with?', a: 'maps' }
+  ];
+  let score = 0;
+  questions.forEach(item => {
+    const ans = prompt(item.q + '\n(short answer)');
+    if (ans && ans.toLowerCase().includes(item.a.split(' ')[0])) score++;
+  });
+  alert(`Self-test: ${score}/${questions.length}. Reflection: which principle is least installed?`);
+  log('Self-test run', score + '/' + questions.length);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const testBtn = document.createElement('button');
+  testBtn.textContent = 'Run knowledge self-test';
+  testBtn.style.marginTop = '1rem';
+  testBtn.onclick = runSelfTest;
+  const knowledgePanel = document.getElementById('knowledge');
+  if (knowledgePanel) knowledgePanel.append(testBtn);
 });
 
 loadAll();
