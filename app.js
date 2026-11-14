@@ -1,1 +1,275 @@
-PLACEHOLDER_TO_BE_REPLACED
+/* realityOS — local-only personal OS prototype
+   Data stays in browser localStorage. No network. */
+
+const STORAGE_KEY = 'realityos-v1';
+
+const state = {
+  goals: [],
+  protocols: [],
+  notes: '',
+  history: [],
+  startedAt: Date.now()
+};
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      Object.assign(state, parsed);
+      if (!state.startedAt) state.startedAt = Date.now();
+    }
+  } catch (e) {
+    console.warn('Failed to load state', e);
+  }
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderAll();
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function formatUptime() {
+  const ms = Date.now() - state.startedAt;
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  if (h > 0) return `${h}h ${m % 60}m`;
+  if (m > 0) return `${m}m ${s % 60}s`;
+  return `${s}s`;
+}
+
+function addHistory(text) {
+  state.history.unshift({
+    id: uid(),
+    ts: Date.now(),
+    text
+  });
+  if (state.history.length > 200) state.history.length = 200;
+}
+
+/* ---------- Tabs ---------- */
+function initTabs() {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+/* ---------- Goals ---------- */
+function renderGoals() {
+  const list = document.getElementById('goal-list');
+  list.innerHTML = '';
+  state.goals.forEach(g => {
+    const li = document.createElement('li');
+    const label = document.createElement('span');
+    label.textContent = g.text;
+    if (g.done) label.classList.add('done');
+    const actions = document.createElement('span');
+    const toggle = document.createElement('button');
+    toggle.textContent = g.done ? 'Undo' : 'Done';
+    toggle.onclick = () => {
+      g.done = !g.done;
+      addHistory(`${g.done ? 'Completed' : 'Reopened'} goal: ${g.text}`);
+      save();
+    };
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.onclick = () => {
+      state.goals = state.goals.filter(x => x.id !== g.id);
+      addHistory(`Deleted goal: ${g.text}`);
+      save();
+    };
+    actions.append(toggle, ' ', del);
+    li.append(label, actions);
+    list.append(li);
+  });
+  document.getElementById('goal-count').textContent = `Goals: ${state.goals.length}`;
+  document.getElementById('dash-active').textContent = state.goals.filter(g => !g.done).length;
+  document.getElementById('dash-done').textContent = state.goals.filter(g => g.done).length;
+}
+
+function initGoals() {
+  document.getElementById('goal-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('goal-input');
+    const text = input.value.trim();
+    if (!text) return;
+    state.goals.unshift({ id: uid(), text, done: false, created: Date.now() });
+    addHistory(`Added goal: ${text}`);
+    input.value = '';
+    save();
+  });
+}
+
+/* ---------- Protocols ---------- */
+function renderProtocols() {
+  const list = document.getElementById('protocol-list');
+  list.innerHTML = '';
+  state.protocols.forEach(p => {
+    const li = document.createElement('li');
+    const content = document.createElement('div');
+    content.innerHTML = `<strong>${p.title}</strong><br><span class="hint">${p.body}</span>`;
+    const actions = document.createElement('span');
+    const exec = document.createElement('button');
+    exec.textContent = 'Execute';
+    exec.onclick = () => {
+      const outcome = prompt('Outcome / note (optional):') || '';
+      addHistory(`Executed protocol "${p.title}"${outcome ? ': ' + outcome : ''}`);
+      p.uses = (p.uses || 0) + 1;
+      save();
+    };
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.onclick = () => {
+      state.protocols = state.protocols.filter(x => x.id !== p.id);
+      addHistory(`Deleted protocol: ${p.title}`);
+      save();
+    };
+    actions.append(exec, ' ', del);
+    li.append(content, actions);
+    list.append(li);
+  });
+  document.getElementById('protocol-count').textContent = `Protocols: ${state.protocols.length}`;
+  document.getElementById('dash-protocols').textContent = state.protocols.length;
+}
+
+function initProtocols() {
+  document.getElementById('protocol-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const title = document.getElementById('protocol-title').value.trim();
+    const body = document.getElementById('protocol-body').value.trim();
+    if (!title || !body) return;
+    state.protocols.unshift({ id: uid(), title, body, uses: 0, created: Date.now() });
+    addHistory(`Saved protocol: ${title}`);
+    document.getElementById('protocol-title').value = '';
+    document.getElementById('protocol-body').value = '';
+    save();
+  });
+
+  document.querySelectorAll('.template').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('protocol-title').value = btn.dataset.title;
+      document.getElementById('protocol-body').value = btn.dataset.body;
+    });
+  });
+}
+
+/* ---------- Notes ---------- */
+function initNotes() {
+  const ta = document.getElementById('notes');
+  ta.value = state.notes || '';
+  document.getElementById('save-notes').addEventListener('click', () => {
+    state.notes = ta.value;
+    addHistory('Saved system notes');
+    save();
+  });
+}
+
+/* ---------- History & Import/Export ---------- */
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  state.history.slice(0, 50).forEach(h => {
+    const li = document.createElement('li');
+    const d = new Date(h.ts);
+    li.innerHTML = `<span class="hint">${d.toLocaleString()}</span> ${h.text}`;
+    list.append(li);
+  });
+  const recent = document.getElementById('dash-recent');
+  recent.innerHTML = '';
+  state.history.slice(0, 8).forEach(h => {
+    const li = document.createElement('li');
+    li.textContent = h.text;
+    recent.append(li);
+  });
+  document.getElementById('dash-executions').textContent =
+    state.history.filter(h => h.text.startsWith('Executed')).length;
+}
+
+function initImportExport() {
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `realityos-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+  });
+
+  const fileInput = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed.goals && parsed.protocols) {
+          Object.assign(state, parsed);
+          addHistory('Imported data');
+          save();
+          alert('Import successful');
+        } else {
+          alert('Invalid realityOS file');
+        }
+      } catch (e) {
+        alert('Could not parse file');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+/* ---------- Visualization ---------- */
+function renderViz() {
+  const viz = document.getElementById('viz');
+  const active = state.goals.filter(g => !g.done).length;
+  const protos = state.protocols.length;
+  const execs = Math.min(state.history.filter(h => h.text.startsWith('Executed')).length, 20);
+  const total = Math.max(active + protos + execs, 1);
+  viz.innerHTML = `
+    <div class="viz-bar">
+      <div class="seg goals" style="flex:${active}" title="Active goals: ${active}"></div>
+      <div class="seg protocols" style="flex:${protos}" title="Protocols: ${protos}"></div>
+      <div class="seg executions" style="flex:${execs}" title="Recent executions: ${execs}"></div>
+    </div>
+    <p class="hint" style="margin-top:0.4rem">Blue = active goals · Purple = protocols · Green = executions</p>
+  `;
+}
+
+/* ---------- Render & Boot ---------- */
+function renderAll() {
+  document.getElementById('uptime').textContent = `Uptime: ${formatUptime()}`;
+  renderGoals();
+  renderProtocols();
+  renderHistory();
+  renderViz();
+}
+
+function boot() {
+  load();
+  initTabs();
+  initGoals();
+  initProtocols();
+  initNotes();
+  initImportExport();
+  renderAll();
+  setInterval(() => {
+    document.getElementById('uptime').textContent = `Uptime: ${formatUptime()}`;
+  }, 1000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
