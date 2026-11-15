@@ -74,6 +74,16 @@ function renderGoals() {
     label.textContent = g.text;
     if (g.done) label.classList.add('done');
     const actions = document.createElement('span');
+    const edit = document.createElement('button');
+    edit.textContent = 'Edit';
+    edit.onclick = () => {
+      const newText = prompt('Edit goal:', g.text);
+      if (newText && newText.trim() && newText.trim() !== g.text) {
+        g.text = newText.trim();
+        addHistory(`Edited goal: ${g.text}`);
+        save();
+      }
+    };
     const toggle = document.createElement('button');
     toggle.textContent = g.done ? 'Undo' : 'Done';
     toggle.onclick = () => {
@@ -84,11 +94,13 @@ function renderGoals() {
     const del = document.createElement('button');
     del.textContent = 'Delete';
     del.onclick = () => {
-      state.goals = state.goals.filter(x => x.id !== g.id);
-      addHistory(`Deleted goal: ${g.text}`);
-      save();
+      if (confirm(`Delete goal: ${g.text}?`)) {
+        state.goals = state.goals.filter(x => x.id !== g.id);
+        addHistory(`Deleted goal: ${g.text}`);
+        save();
+      }
     };
-    actions.append(toggle, ' ', del);
+    actions.append(edit, ' ', toggle, ' ', del);
     li.append(label, actions);
     list.append(li);
   });
@@ -117,8 +129,24 @@ function renderProtocols() {
   state.protocols.forEach(p => {
     const li = document.createElement('li');
     const content = document.createElement('div');
-    content.innerHTML = `<strong>${p.title}</strong><br><span class="hint">${p.body}</span>`;
+    content.innerHTML = `<strong>${p.title}</strong><br><span class="hint">${p.body}</span>${p.uses ? `<br><span class="hint">Used ${p.uses} time(s)</span>` : ''}`;
     const actions = document.createElement('span');
+    const edit = document.createElement('button');
+    edit.textContent = 'Edit';
+    edit.onclick = () => {
+      const newTitle = prompt('Edit title:', p.title);
+      if (newTitle === null) return;
+      const newBody = prompt('Edit body:', p.body);
+      if (newBody === null) return;
+      const t = newTitle.trim();
+      const b = newBody.trim();
+      if (t && b && (t !== p.title || b !== p.body)) {
+        p.title = t;
+        p.body = b;
+        addHistory(`Edited protocol: ${p.title}`);
+        save();
+      }
+    };
     const exec = document.createElement('button');
     exec.textContent = 'Execute';
     exec.onclick = () => {
@@ -130,11 +158,13 @@ function renderProtocols() {
     const del = document.createElement('button');
     del.textContent = 'Delete';
     del.onclick = () => {
-      state.protocols = state.protocols.filter(x => x.id !== p.id);
-      addHistory(`Deleted protocol: ${p.title}`);
-      save();
+      if (confirm(`Delete protocol: ${p.title}?`)) {
+        state.protocols = state.protocols.filter(x => x.id !== p.id);
+        addHistory(`Deleted protocol: ${p.title}`);
+        save();
+      }
     };
-    actions.append(exec, ' ', del);
+    actions.append(edit, ' ', exec, ' ', del);
     li.append(content, actions);
     list.append(li);
   });
