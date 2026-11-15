@@ -6,8 +6,8 @@ A local-only browser prototype. All data stays in your browser via `localStorage
 
 ## Features
 
-- **Goals** — add, complete, reopen, delete
-- **Protocols** — if-then procedures with one-click templates, execute + outcome logging
+- **Goals** — add, edit, complete, reopen, delete
+- **Protocols** — if-then procedures with one-click templates, edit, execute + outcome logging, use counts
 - **Knowledge library** — expandable principles with reflection prompts
 - **System notes** — free-form refactoring / diagnostic notes
 - **History** — recent activity + full export / import of JSON state
@@ -25,7 +25,7 @@ python3 -m http.server 8080
 
 ## Status
 
-Early prototype (v0.7). Core interaction loop is implemented. Next steps could include richer knowledge series, protocol versioning, or better visualization.
+Early prototype (v0.8). Core interaction loop is implemented, including in-place editing of goals and protocols. Next steps could include richer knowledge series, protocol versioning, tags, or better visualization.
 
 ---
 
