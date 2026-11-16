@@ -292,6 +292,7 @@ function boot() {
   initProtocols();
   initNotes();
   initImportExport();
+  initSearch();
   renderAll();
   setInterval(() => {
     document.getElementById('uptime').textContent = `Uptime: ${formatUptime()}`;
@@ -302,4 +303,28 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {
   boot();
+}
+
+/* ---------- Global Search ---------- */
+function initSearch() {
+  const input = document.getElementById('global-search');
+  if (!input) return;
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    filterLists(q);
+  });
+}
+
+function filterLists(q) {
+  // Filter goals
+  document.querySelectorAll('#goal-list li').forEach(li => {
+    const text = li.textContent.toLowerCase();
+    li.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+  // Filter protocols
+  document.querySelectorAll('#protocol-list li').forEach(li => {
+    const text = li.textContent.toLowerCase();
+    li.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+  // Simple note highlight or filter not implemented for notes textarea
 }
