@@ -12,6 +12,7 @@ A local-only browser prototype. All data stays in your browser via `localStorage
 - **System notes** — free-form refactoring / diagnostic notes
 - **History** — recent activity + full export / import of JSON state
 - **Dashboard** — live counts, simple visualization bar, uptime
+- **Global search** — filter goals and protocols live from the header
 
 ## Run it
 
@@ -25,7 +26,7 @@ python3 -m http.server 8080
 
 ## Status
 
-Early prototype (v0.8). Core interaction loop is implemented, including in-place editing of goals and protocols. Next steps could include richer knowledge series, protocol versioning, tags, or better visualization.
+Early prototype (v0.8). Core interaction loop is implemented, including in-place editing of goals and protocols and live search. Next steps could include richer knowledge series, protocol versioning, tags, or better visualization.
 
 ---
 
