@@ -101,24 +101,51 @@
         <p>Advice is useless. Use if-then protocols that change system state based on process physics.</p>
         <p class="reflection">Reflection: Write one if-then for a recurring friction point.</p>
       </details>
-      <!-- remaining knowledge items unchanged for brevity in this example; full file would include them -->
+      <details class="knowledge-item">
+        <summary><h3>S1.B3 Evidence First</h3></summary>
+        <p>Prefer reproducible outcomes over stories. Test the smallest change that can falsify the map.</p>
+        <p class="reflection">Reflection: What is the smallest testable outcome for your current goal?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B4 Attention as Resource</h3></summary>
+        <p>Attention is limited. Protocols that protect focus increase effective uptime.</p>
+        <p class="reflection">Reflection: Where did attention leak today? Design a protect protocol.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B5 Uptime Metrics</h3></summary>
+        <p>Uptime is sustained effective action under real conditions, not peak motivation.</p>
+        <p class="reflection">Reflection: Track one day of sleep/food/movement impact on focus.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B6 Observation vs Interpretation</h3></summary>
+        <p>Separate raw observation from the story you attach. The protocol acts on the observation.</p>
+        <p class="reflection">Reflection: What did you actually see/hear vs what meaning did you add?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>Validation</h3></summary>
+        <p>Truth is reproducibility of results. If the protocol produces the predicted change, it is valid.</p>
+        <p class="reflection">Reflection: Which protocol has produced a measurable change?</p>
+      </details>
     </section>
 
     <section id="notes" class="panel">
-      <h2>System Notes</h2>
-      <textarea id="notes" placeholder="Free-form notes on system state, diagnostics, refactoring ideas..."></textarea>
+      <h2>System Notes / Refactoring</h2>
+      <textarea id="notes" placeholder="Internal programs, automatic reactions, diagnostics, root-cause analysis..."></textarea>
       <button id="save-notes">Save notes</button>
     </section>
 
     <section id="history" class="panel">
-      <h2>History</h2>
-      <button id="export-btn">Export JSON</button>
-      <button id="import-btn">Import JSON</button>
+      <h2>Progress History</h2>
+      <div class="actions">
+        <button id="export-btn">Export data</button>
+        <button id="import-btn">Import data</button>
+        <input type="file" id="import-file" accept=".json" hidden>
+      </div>
       <ul id="history-list"></ul>
     </section>
   </main>
   <footer>
-    <p>Local-only. Data in your browser. No telemetry.</p>
+    <p>Local-only prototype. Data stays in your browser. <a href="https://github.com/robs313166-debug/reality-os">source</a></p>
   </footer>
   <script src="app.js"></script>
 </body>
