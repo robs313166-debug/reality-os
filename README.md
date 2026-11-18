@@ -26,7 +26,7 @@ python3 -m http.server 8080
 
 ## Status
 
-Early prototype (v0.8). Core interaction loop is implemented, including in-place editing of goals and protocols and live search. Next steps could include richer knowledge series, protocol versioning, tags, or better visualization.
+Early prototype (v0.9). Core interaction loop is implemented, including in-place editing of goals and protocols and live search. Added basic #tag support for goals and protocols (parsed from input). Next steps: richer knowledge series, protocol versioning, or better visualization.
 
 ---
 

@@ -73,6 +73,12 @@ function renderGoals() {
     const label = document.createElement('span');
     label.textContent = g.text;
     if (g.done) label.classList.add('done');
+    if (g.tags && g.tags.length) {
+      const tags = document.createElement('span');
+      tags.className = 'hint';
+      tags.textContent = ' ' + g.tags.map(t => '#' + t).join(' ');
+      label.appendChild(tags);
+    }
     const actions = document.createElement('span');
     const edit = document.createElement('button');
     edit.textContent = 'Edit';
@@ -115,8 +121,10 @@ function initGoals() {
     const input = document.getElementById('goal-input');
     const text = input.value.trim();
     if (!text) return;
-    state.goals.unshift({ id: uid(), text, done: false, created: Date.now() });
-    addHistory(`Added goal: ${text}`);
+    const tags = (text.match(/#(\w+)/g) || []).map(t => t.slice(1));
+    const cleanText = text.replace(/#\w+/g, '').trim();
+    state.goals.unshift({ id: uid(), text: cleanText || text, tags, done: false, created: Date.now() });
+    addHistory(`Added goal: ${cleanText || text}`);
     input.value = '';
     save();
   });
@@ -129,7 +137,8 @@ function renderProtocols() {
   state.protocols.forEach(p => {
     const li = document.createElement('li');
     const content = document.createElement('div');
-    content.innerHTML = `<strong>${p.title}</strong><br><span class="hint">${p.body}</span>${p.uses ? `<br><span class="hint">Used ${p.uses} time(s)</span>` : ''}`;
+    const tagStr = p.tags && p.tags.length ? ' ' + p.tags.map(t => '#' + t).join(' ') : '';
+    content.innerHTML = `<strong>${p.title}${tagStr}</strong><br><span class="hint">${p.body}</span>${p.uses ? `<br><span class="hint">Used ${p.uses} time(s)</span>` : ''}`;
     const actions = document.createElement('span');
     const edit = document.createElement('button');
     edit.textContent = 'Edit';
@@ -178,8 +187,10 @@ function initProtocols() {
     const title = document.getElementById('protocol-title').value.trim();
     const body = document.getElementById('protocol-body').value.trim();
     if (!title || !body) return;
-    state.protocols.unshift({ id: uid(), title, body, uses: 0, created: Date.now() });
-    addHistory(`Saved protocol: ${title}`);
+    const tags = (title.match(/#(\w+)/g) || []).map(t => t.slice(1));
+    const cleanTitle = title.replace(/#\w+/g, '').trim();
+    state.protocols.unshift({ id: uid(), title: cleanTitle || title, body, tags, uses: 0, created: Date.now() });
+    addHistory(`Saved protocol: ${cleanTitle || title}`);
     document.getElementById('protocol-title').value = '';
     document.getElementById('protocol-body').value = '';
     save();
@@ -230,32 +241,34 @@ function initImportExport() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `realityos-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = 'realityos-export.json';
     a.click();
   });
 
-  const fileInput = document.getElementById('import-file');
-  document.getElementById('import-btn').addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (parsed.goals && parsed.protocols) {
-          Object.assign(state, parsed);
-          addHistory('Imported data');
-          save();
-          alert('Import successful');
-        } else {
-          alert('Invalid realityOS file');
+  document.getElementById('import-btn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = () => {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (confirm('Import will overwrite current data. Continue?')) {
+            Object.assign(state, data);
+            if (!state.startedAt) state.startedAt = Date.now();
+            save();
+            addHistory('Imported state');
+          }
+        } catch (e) {
+          alert('Invalid JSON');
         }
-      } catch (e) {
-        alert('Could not parse file');
-      }
+      };
+      reader.readAsText(file);
     };
-    reader.readAsText(file);
+    input.click();
   });
 }
 
@@ -263,20 +276,44 @@ function initImportExport() {
 function renderViz() {
   const viz = document.getElementById('viz');
   const active = state.goals.filter(g => !g.done).length;
+  const done = state.goals.filter(g => g.done).length;
   const protos = state.protocols.length;
-  const execs = Math.min(state.history.filter(h => h.text.startsWith('Executed')).length, 20);
-  const total = Math.max(active + protos + execs, 1);
+  const execs = state.history.filter(h => h.text.startsWith('Executed')).length;
+  const total = active + done + protos + execs || 1;
   viz.innerHTML = `
     <div class="viz-bar">
       <div class="seg goals" style="flex:${active}" title="Active goals: ${active}"></div>
+      <div class="seg" style="flex:${done}; background:#666" title="Completed: ${done}"></div>
       <div class="seg protocols" style="flex:${protos}" title="Protocols: ${protos}"></div>
-      <div class="seg executions" style="flex:${execs}" title="Recent executions: ${execs}"></div>
+      <div class="seg executions" style="flex:${execs}" title="Executions: ${execs}"></div>
     </div>
-    <p class="hint" style="margin-top:0.4rem">Blue = active goals · Purple = protocols · Green = executions</p>
   `;
 }
 
-/* ---------- Render & Boot ---------- */
+/* ---------- Search ---------- */
+function initSearch() {
+  const input = document.getElementById('global-search');
+  if (!input) return;
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    filterLists(q);
+  });
+}
+
+function filterLists(q) {
+  // Filter goals
+  document.querySelectorAll('#goal-list li').forEach(li => {
+    const text = li.textContent.toLowerCase();
+    li.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+  // Filter protocols
+  document.querySelectorAll('#protocol-list li').forEach(li => {
+    const text = li.textContent.toLowerCase();
+    li.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+  // Simple note highlight or filter not implemented for notes textarea
+}
+
 function renderAll() {
   document.getElementById('uptime').textContent = `Uptime: ${formatUptime()}`;
   renderGoals();
@@ -303,28 +340,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {
   boot();
-}
-
-/* ---------- Global Search ---------- */
-function initSearch() {
-  const input = document.getElementById('global-search');
-  if (!input) return;
-  input.addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase().trim();
-    filterLists(q);
-  });
-}
-
-function filterLists(q) {
-  // Filter goals
-  document.querySelectorAll('#goal-list li').forEach(li => {
-    const text = li.textContent.toLowerCase();
-    li.style.display = !q || text.includes(q) ? '' : 'none';
-  });
-  // Filter protocols
-  document.querySelectorAll('#protocol-list li').forEach(li => {
-    const text = li.textContent.toLowerCase();
-    li.style.display = !q || text.includes(q) ? '' : 'none';
-  });
-  // Simple note highlight or filter not implemented for notes textarea
 }
