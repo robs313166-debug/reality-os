@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>realityOS — Personal Reality</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>realityOS</h1>
+      <span class="version">v0.10</span>
+    </div>
+    <p>Personal operating system for consciousness, goals, and system refactoring.</p>
+    <div class="search-bar"><input type="search" id="global-search" placeholder="Search goals, protocols, notes..." /></div>
+    <div class="status">
+      <span id="uptime">Uptime: —</span>
+      <span id="goal-count">Goals: 0</span>
+      <span id="protocol-count">Protocols: 0</span>
+    </div>
+  </header>
+  <nav>
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="goals">Goals</button>
+    <button class="tab" data-tab="protocols">Protocols</button>
+    <button class="tab" data-tab="knowledge">Knowledge</button>
+    <button class="tab" data-tab="notes">Notes</button>
+    <button class="tab" data-tab="history">History</button>
+  </nav>
+  <main>
+    <section id="dashboard" class="panel active">
+      <h2>System Status</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Active Goals</h3>
+          <p id="dash-active">0</p>
+        </div>
+        <div class="card">
+          <h3>Completed</h3>
+          <p id="dash-done">0</p>
+        </div>
+        <div class="card">
+          <h3>Protocols</h3>
+          <p id="dash-protocols">0</p>
+        </div>
+        <div class="card">
+          <h3>Executions</h3>
+          <p id="dash-executions">0</p>
+        </div>
+      </div>
+      <h3>System Visualization</h3>
+      <div id="viz" class="viz"></div>
+      <h3>Recent Activity</h3>
+      <ul id="dash-recent"></ul>
+    </section>
+
+    <section id="goals" class="panel">
+      <h2>Goals</h2>
+      <form id="goal-form">
+        <input type="text" id="goal-input" placeholder="New goal or intention (use #tags)" required>
+        <button type="submit">Add</button>
+      </form>
+      <ul id="goal-list"></ul>
+    </section>
+
+    <section id="protocols" class="panel">
+      <h2>Protocols</h2>
+      <p class="hint">Reusable if-then procedures for debugging perception and behavior. Click Execute to log use and record an outcome. Edit to refine. Use #tags in title.</p>
+      <div class="templates">
+        <p class="hint">Templates:</p>
+        <button type="button" class="template" data-title="Root Cause Pause" data-body="If I notice automatic reaction → then pause, name the program, ask 'what is the root cause?'">Root Cause</button>
+        <button type="button" class="template" data-title="Uptime Check" data-body="If energy low or distraction high → then check sleep/food/movement, then one focused action">Uptime Check</button>
+        <button type="button" class="template" data-title="Belief Debug" data-body="If strong judgment or emotion → then write the assumption, test it against evidence, update map">Belief Debug</button>
+        <button type="button" class="template" data-title="Attention Anchor" data-body="If mind wanders during focus → then return to the single next action, ignore the story">Attention Anchor</button>
+        <button type="button" class="template" data-title="Outcome Test" data-body="If uncertain about a plan → then define the smallest testable outcome and run it">Outcome Test</button>
+      </div>
+      <form id="protocol-form">
+        <input type="text" id="protocol-title" placeholder="Protocol name (use #tags)" required>
+        <textarea id="protocol-body" placeholder="If [condition] → then [action]" required></textarea>
+        <button type="submit">Save protocol</button>
+      </form>
+      <ul id="protocol-list"></ul>
+    </section>
+
+    <section id="knowledge" class="panel">
+      <h2>Knowledge Library</h2>
+      <p class="hint">Core principles and series for system installation. Click items to expand reflections.</p>
+      <details class="knowledge-item">
+        <summary><h3>S1. System Architecture</h3></summary>
+        <p>Human existence is a system. Debug automatic reactions. Maximize uptime through protocols.</p>
+        <p class="reflection">Reflection: What automatic reaction did you notice today? Name the "program."</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B1 Root Access</h3></summary>
+        <p>You interact with maps, not reality. Question axioms. Delete legacy code.</p>
+        <p class="reflection">Reflection: Which belief are you treating as fixed that might be a map?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B2 Protocols Over Advice</h3></summary>
+        <p>Advice is useless. Use if-then protocols that change system state based on process physics.</p>
+        <p class="reflection">Reflection: Write one if-then for a recurring friction point.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B3 Evidence First</h3></summary>
+        <p>Prefer reproducible outcomes over stories. Test the smallest change that can falsify the map.</p>
+        <p class="reflection">Reflection: What is the smallest testable outcome for your current goal?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B4 Attention as Resource</h3></summary>
+        <p>Attention is limited. Protocols that protect focus increase effective uptime.</p>
+        <p class="reflection">Reflection: Where did attention leak today? Design a protect protocol.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B5 Uptime Metrics</h3></summary>
+        <p>Uptime is sustained effective action under real conditions, not peak motivation.</p>
+        <p class="reflection">Reflection: Track one day of sleep/food/movement impact on focus.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B6 Observation vs Interpretation</h3></summary>
+        <p>Separate raw observation from the story you attach. The protocol acts on the observation.</p>
+        <p class="reflection">Reflection: What did you actually see/hear vs what meaning did you add?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B7 Feedback Loops</h3></summary>
+        <p>Systems improve through closed loops of action → observation → adjustment. Protocols that close the loop increase adaptation speed.</p>
+        <p class="reflection">Reflection: Which of your protocols has a clear feedback step? Add one if missing.</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>S1.B8 Sovereignty</h3></summary>
+        <p>Root access means you can rewrite the rules of your internal system. External advice is data, not authority.</p>
+        <p class="reflection">Reflection: What rule are you following that you could rewrite?</p>
+      </details>
+      <details class="knowledge-item">
+        <summary><h3>Validation</h3></summary>
+        <p>Truth is reproducibility of results. If the protocol produces the predicted change, it is valid.</p>
+        <p class="reflection">Reflection: Which protocol has produced a measurable change?</p>
+      </details>
+    </section>
+
+    <section id="notes" class="panel">
+      <h2>System Notes / Refactoring</h2>
+      <textarea id="notes" placeholder="Internal programs, automatic reactions, diagnostics, root-cause analysis..."></textarea>
+      <button id="save-notes">Save notes</button>
+    </section>
+
+    <section id="history" class="panel">
+      <h2>Progress History</h2>
+      <div class="actions">
+        <button id="export-btn">Export data</button>
+        <button id="import-btn">Import data</button>
+        <input type="file" id="import-file" accept=".json" hidden>
+      </div>
+      <ul id="history-list"></ul>
+    </section>
+  </main>
+  <footer>
+    <p>Local-only prototype. Data stays in your browser. <a href="https://github.com/robs313166-debug/reality-os">source</a></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
