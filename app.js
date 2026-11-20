@@ -181,7 +181,17 @@ function renderProtocols() {
         save();
       }
     };
-    actions.append(edit, ' ', exec, ' ', del);
+    const hist = document.createElement('button');
+    hist.textContent = 'History';
+    hist.onclick = () => {
+      if (!p.versions || !p.versions.length) {
+        alert('No previous versions.');
+        return;
+      }
+      const lines = p.versions.map((v, i) => `v${i+1} (${new Date(v.ts).toLocaleString()}): ${v.title}\n${v.body}`).join('\n---\n');
+      alert(`Previous versions of "${p.title}":\n\n${lines}`);
+    };
+    actions.append(edit, ' ', exec, ' ', hist, ' ', del);
     li.append(content, actions);
     list.append(li);
   });
